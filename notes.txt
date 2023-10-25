@@ -1,0 +1,7 @@
+Kotlin emphasizes on:
+- conciseness
+- safety
+- pragmatism
+- interoperability with Java
+
+In kotlin, you can write functions outside of class, in Java, you can not
