@@ -5,3 +5,131 @@ Kotlin emphasizes on:
 - interoperability with Java
 
 In kotlin, you can write functions outside of class, in Java, you can not
+but the truth is, the compiler will then deal with boilerplate code and generate the class under the covers for us
+these functions are called top level functions because they are not defined in a class
+
+kotlinc compiles .kt files into .class files than are equivalent to the ones that javac produces and that can be read by the JVM
+to run kotlin applications, we need the kotlin runtime library which is something similr in nature to the JRE
+
+the JVM looks for the main(...) method signature to find the entry point of a program
+everything is class in kotlin for example Array<String>
+
+Kotlin tries to reduce the amount of code we write
+for example, we write println() instead of Systemt.out.println() because kotlin imports from of this stuff from the start
+we call this the kotlin standard library
+https://kotlinlang.org/api/latest/jvm/stdlib/
+it serves the same pupose that the JDK does, it has a bunch of API for you to use
+
+Kotlin is statically types, meaning that all variable types are known at compile time
+
+kotlin: preferes stuff to be immutable than mutable vs Java, where by default, variables are mutable
+    val number3: Int
+    number3 = 10
+    // number3 = 11 => this will throw the error
+
+    var number4: Int
+    number4 = 9
+    number4 = 12
+    // var: value is mutable
+
+val employee = Employee("lynn smith", 500) => no need for "new" keyword
+employee.name = "lynn jones"
+// employee.id = 5
+// val employee can not be assigned a new Employee instance (val), but that does not mean that its member variables
+// can not be changed, in this case, the name can be changed (var) but id can not
+
+Type Aliases
+============
+StringBuilder stringBuilder...
+by going to its definition, we see the following
+@SinceKotlin("1.1") public actual typealias StringBuilder = java.lang.StringBuilder
+=> this means, that when we use StringBuilder in kotlin, we are actually using the java StringBuilder
+
+Custom Aliases can be declared => bet done at file level
+declare it: typealias EmployeeSet = Set<Employee>
+use it: val employees: EmployeeSet
+
+Some quick diff between Java and Kotlin
+---------------------------------------
+kotlin does not require semicolons
+kotlin has many wrappers around some commonly used Java functions like println and System.out.println
+Hard keyowrds: Java and Kotlin => example: int, double, if...
+Soft keywords: Kotlin => soft keywords can be redefined where they are not being used to meet their built-in function,
+but it is not considered as a good practice
+
+square brakets can be used to access elements in collection instead of .get()
+=> this is done in pursuit of more concise code
+concise: giving a lot of information clearly and in a few words; brief but comprehensive
+
+Kotlin has its own String class
+for example, in Java length is a method (bla.length()) while in kotlin, it is a property
+
+Equalities
+----------
+in Java:
+== => compares instance references
+.equals(...) => override to check for structural equality
+in Kotlin:
+== => differens to the .equals() method
+=== => the triple = is what checks for referencial equality
+same applies for != and !==
+
+NOTE
+----
+The difference between == and === is that: == converts the variable values to the same type before performing comparison.
+This is called type coercion. === does not do any type conversion (coercion) and returns true only if both values and types
+are identical for the two variables being compared
+
+Bitwise operators
+val x = 0x00110011
+val y = 0x10100011
+
+Java => | & ^
+kotlin: or and xor
+
+"is" vs "instanceOf"
+!is (not is)
+
+Casting and Smart Casting
+-------------------------
+to cast in Java: (Employee) something
+to cast in kotlin: val newEmp = something as Employee
+Kotlin does smart casting, for example:
+if (something is Employee){
+  kotlin treats the variable as if it has been cast
+  so here, inside this block of code, no need to cast something as an Employee
+}
+
+Request Templates
+-----------------
+val change = 4.22
+println("to show the value of change we use: \$change and its value is $change (ps: $$change shows the $ sign)")
+Values of expressions can be substituted as well (you use ${...}):
+- println("division = ${x / y}")
+- println("employee id = ${employee.id}")
+
+Raw Strings
+-----------
+triple quoted
+no need to escape characters (i.e it includes new line chracter, can't use \n here)
+can be multiline:
+"""balbalbalbalbalbalba
+lkasdjflkajsdlkfj
+asdfasdfasdf"""
+
+the indentation here looks bad, but if we beautify the code, the resulting string will contain the tabs
+so we use trimMargin method with a trim margin char of our choosing
+bro = """balbalbalbalbalbalba
+        *lkasdjflkajsdlkfj
+        *asdfasdfasdf""".trimMargin("*")
+
+String templates can also be used inside raw strings
+
+Read Eval and Print Loop: REPL
+------------------------------
+Go to: Tools -> Kotlin -> REPL
+REPL is aware of the declarations in the project
+it is like a command line active terminal
+you can use it to test some code and evaluate some expressions
+it also knows about previous declarations you did in it so,
+if you do x = 3 + 4 which results in 7 and reference x later on, you will get the value of 7
