@@ -241,3 +241,453 @@ creating arrays of nulls:
     val myArrayOfNulls: Array<Int?> = Array(16) { null }
     val myArrayOfNulls2 = arrayOfNulls<Int>(16)
 
+OOP and Kotlin
+==============
+Access modifiers
+----------------
+we have 4:
+- public, private and protected: like java
+- internal => visible inside the module (if inside a private class, then it would only be visible inside the class), so
+we would use internal is the variable is accessible from outside the file
+
+In kotlin, classes can not see private members belonging to inner classes
+private (kotlin) -> compiled to package private
+internal (kotlin) -> compiled to public
+
+The default visibility in Java is package private, but in kotlin, it is public
+
+In java, the top level is always a class, but in kotlin, we can have variables and functions
+If an item at the top level is private, that means it is "file level" private
+
+In Java, if a class is public, its name has to match the file name, i.e there can only be one public class per file
+in Kotlin that is not the case, you can have multiple classes per file
+
+OOP
+---
+// Primary constructor => declared outside the curly braces
+class Employee constructor(name: String) {
+    val name: String
+
+// init blocks are not constructors, they are used in conjunction with the primary constructor
+// primary constructors can not contain code, so you would need to use init blocks (you can have more than one)
+    init {
+        this.name = name
+    }
+}
+
+// another way of writing the above - reduction of boilerplate code
+class Employee constructor(name: String) {
+    val name: String = name
+}
+
+// more boilerplate reduction, under the hood, the code gets added
+class Employee constructor(val name: String) {
+}
+
+// even more boilerplate reduction, remove the "constructor" keyword
+class Employee (val name: String) {
+}
+
+we would need to add the constructor keyword back if we need to change the visibility of the primary contructor
+
+// SECONDARY CONSTRUCTOR
+class Employee(val name: String) {
+
+    var fullTime: Boolean = true
+
+    // 2ndary constructor can not declare members (val or var)
+    // also, it must delegate what needs to be delegated to the primary constructor =>" : this(...)"
+    constructor(name: String, fullTime: Boolean) : this(name) {
+        this.fullTime = fullTime
+    }
+}
+
+// The kotlin way
+class Employee(val name: String, var fullTime: Boolean = true) {...}
+
+PS: primary contructor is not mandatory, simply write the class like you do in Java
+PS: default values can also be used in 2ndary constructors
+
+Properties:
+-----------
+in kotlin, we call member variables and fields: properties
+for public properties, we use the dot notation. Under the hood, this is calling the default getters and setters
+
+in kotlin, getters and setters must have the same visibility as their properties
+to a private property will have a private getter and a private setter (or ones with less permissive access)
+hence it can not be accessed from outside of its class
+in Kotlin, we have to think differently: in koltin, it is OK to have public properties
+
+PS: access modifiers can be added in the primary constructor, for example:
+class Employee(val name: String, private var fullTime: Boolean = true) {...}
+
+In case we need a custom getter and setter, we will have to declare the properties within the class and not the constructor
+
+in kotlin, if you want a custom set and get, you HAVE to write them directly after the property declaration
+
+    var fullTime = fullTime
+        get() {
+            println("running the custom get")
+            return field // this is called the backing field, this is only generated if we need the value of fullTime
+        }
+        set(value) {
+            println("running the custom set")
+            field = value
+        }
+
+PS: the constructors do not use the accessor methods under the hood
+
+Constants
+---------
+val MY_CONTANT = 100 // at the top level of the file
+we use val for immutability
+
+Data Classes
+------------
+a class that is only meant to store state
+proprties, setters and getters only
+
+with data classes, we get some nice functions for free
+comes with its own toString() function, a custom implementation of the equals() function and a copy() function
+=> all of these of course can be overriden
+=> any property that is not defined in the primary constructor, will not be taken into account for the methods mentioned above
+
+println(car == car2) // True: data class => by default, it does structural comparision
+println(car === car2) // false: different instance
+
+var car4 = car.copy(year = 2016) // copy everything by change value of year property
+
+Condition: there must be a primary constructor and it must contain at least 1 declaration (val or var)
+also, anything set in it MUST also be a declaration
+
+they also get: destructuring declaration
+data classes also can not be abstract, sealed or inner classes
+
+Functions
+---------
+// function with block body
+fun labelMultiply(x: Int, y: Int, label: String): String {
+    return "$label ${x * y}"
+}
+
+If all the function is doing is returning the result of an expression, then we can remove more boilerplate code:
+// function with an expression body
+fun labelMultiply2(x: Int, y: Int, label: String) = "$label ${x * y}"
+
+Void (java) return type: Unit (kotlin)
+
+vararg keyword
+--------------
+fun printCars(vararg cars: Car) {...}
+restriction: we can only have 1 vararg parameter in a function signature
+If vararg was not the last parameter in the function signature, then everything that comes after is will need to be
+sent while mention the name parameters
+
+val numbers = arrayOf(1,2,3) => arrayOf is actually using a vararg
+
+Spread operator: *
+spreads an array into a vararg
+val manyCars = arrayOf(car, car2, car3)
+
+// We use the spread operator to spread the array
+var moreCars = arrayOf(car2, car3)
+val lotsOfCars = arrayOf(manyCars, moreCars, car4) => array containing 2 arrays and an car Object
+but we just want an array of cars so:
+val lotsOfCars = arrayOf(*manyCars, *moreCars, car4)
+
+extension function
+------------------
+allows us to extend a class with more functions
+this does not mean that encapsulations can be broken
+
+// Classic Way
+fun upperFirstAndLast(str: String): String {
+        val upperFirst = str.substring(0, 1).uppercase() + str.substring(1)
+        return upperFirst.substring(0, upperFirst.length - 1) + upperFirst.substring(
+            upperFirst.length - 1,
+            upperFirst.length
+        ).uppercase()
+    }
+
+// to Call: upperFirstAndLast("blabla")
+
+// makes it look like the function belongs to the String class
+fun String.upperFirstAndLast(): String {
+    val upperFirst = this.substring(0, 1).uppercase() + this.substring(1)
+    return upperFirst.substring(0, upperFirst.length - 1) + upperFirst.substring(
+        upperFirst.length - 1,
+        upperFirst.length
+    ).uppercase()
+}
+
+// to Call: "blabla".upperFirstAndLast()
+What we did here is that we preceded the function name with what we call the receiver type
+and "blabla" is the receiver Object
+=> we can also drop the use of "this":
+val upperFirst = this.substring(0, 1).uppercase() + this.substring(1)
+val upperFirst = substring(0, 1).uppercase() + substring(1)
+
+Inline Function
+---------------
+compiled to its body and NOT a function call
+mostly used when dealing with lambdas
+inline fun myFun(...) {...}
+
+Inheritance
+-----------
+in kotlin, everything is final and public by default
+
+// we use the keyword open: to make a class non-final
+open class Printer {
+
+}
+
+// we call the default primary constructor
+class LaserPrinter : Printer() {
+
+}
+
+// we call the default primary constructor
+class LaserPrinter2() : Printer() {
+
+}
+
+// we use a secondary constructor and differ to super()
+class LaserPrinter3 : Printer {
+    constructor(): super()
+
+}
+
+the same rule for open and abstract applies to functions that we are trying to override
+because, of course, in kotlin, everything is final by default, for example:
+
+// we use the keyword open: to make a class non-final
+open abstract class Printer(val modelName: String) {
+    // after adding abstract => we can remove the open keyword: it becomes redundant
+    open fun printModel() = println("the model name is: $modelName")
+
+    // declaring an abtract method
+    abstract fun bestSellingPrice(): Double
+}
+
+class LaserPrinter(modelName: String) : Printer(modelName) {
+    override fun printModel() = println("the new output is: $modelName")
+    override fun bestSellingPrice(): Double = 129.99
+}
+
+Now, in case we want to make a function un-overridable, we have to explicitly use the keyword final
+in addition to abstract, the override keyword implicitly includes the keyword open, so once you override something, you are saying it is open
+and it can be overriden
+
+NOTE: you can not call a super 2ndary constructor from a subclass, all MUST delegate to the primary constructor.
+thus the only way to do such a thing would be if the parent did not have a primary constructor defined
+
+Data classes are closed, they can not be extended, but they can extend other classes (since kotlin 1.1)
+in Kotlin 1.1, they became able to also contain classes
+
+Interfaces
+----------
+interface MyInter {
+    val number: Int // can not be initialized here
+    fun myString(str: String): String
+}
+
+interface MySubInter: MyInter {
+    fun mySubString(str: String): String
+}
+
+no need to use keyowrds open and abstract here, these are abstract anyway
+
+// We can ofcourse implement multiple interfaces
+class SomethingElse: MyClass, MyInter, MyInter2 {
+    override val number: Int = 25
+
+    override fun myString(str: String): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun myString2(str: String): String {
+        TODO("Not yet implemented")
+    }
+}
+
+in interfaces, we can have properties (they do not need to be abtract)
+and we can also provide accessors for them that we can override in subinterfaces or classes that implement said interfaces
+the property will have to be initialized ofcourse in the class
+
+in order to give our interface property a default value, we use a custom get:
+
+interface MyInter {
+    val number: Int // can not be initialized here
+        get() {
+            return number * 100
+            // or return 25 => now we can call this concrete property
+            // in this case, there will be no need to override it
+        }
+    fun myString(str: String): String
+}
+
+interface MyInter {
+    val number: Int
+    val number2: Int
+        get() = 25
+    val number3: Int
+        get() {
+            return 25
+        }
+    fun myString(str: String): String
+}
+
+NOTE: interface properties do not have backing fields
+
+Singletons
+----------
+We use the keyowrd "object" instead of class
+has no constructors
+object keyword => creates and constructs
+
+fun main(args: Array<String>){
+    println(CompComs.getTagLine())
+    println(CompComs.getCopyRightLine())
+}
+
+
+object CompComs {
+    val currentYear = Year.now().value
+    fun getTagLine() = "our company rocks!"
+    fun getCopyRightLine() = "blabla \u00A9 $currentYear blabla"
+}
+
+=> one single instance is created the 1st time the class is used
+NOTE: Singletons can extend other classes or implement interfaces
+
+Companion Objects
+-----------------
+Static keywords in kotlin do not exist
+=> we would use top level (file level) functions for example
+
+class SomeClass {
+    private var privateVar = 6
+    fun accessPrivateVar(){
+        println(privateVar)
+    }
+
+// We can thing of everything inside the companion object as static
+    companion object {
+        private var privateVar2 = 7
+        fun accessPrivateVar(){
+            println(privateVar2)
+        }
+    }
+}
+
+to call the functions then:
+SomeClass.accessPrivateVar2() // using the class without instanciating it
+SomeClass.Companion.accessPrivateVar2()
+
+companion object bla {... we can also give it a name "bla"
+so... SomeClass.bla.accessPrivateVar2() 
+
+Companion objects can be used to access private constructors
+thus they can be used to implement the factory pattern
+
+// We make the primary constructor private => note: a primary constructor is not a requirment for this, can be done with 2ndary ones wihout a primary one
+class SomeFactoryClass private constructor(val someString: String) {
+//    val someString: String
+//
+//    private constructor(str: String) {
+//        someString = str
+//    }
+//
+//    constructor(str: String, lowerCase: Boolean) {
+//        if (lowerCase) {
+//            someString = str.lowercase()
+//        } else {
+//            someString = str.uppercase()
+//        }
+//    }
+
+    companion object {
+        fun justAssign(str: String) = SomeFactoryClass(str)
+
+        fun upperOrLowerCase(str: String, lowerCase: Boolean): SomeFactoryClass {
+            if (lowerCase) {
+                return SomeFactoryClass(str.lowercase())
+            } else {
+                return SomeFactoryClass(str.uppercase())
+            }
+        }
+    }
+}
+
+Anonymous object | Anonymous expressions
+----------------------------------------
+every time we call it, we have to provide an implementation for the function
+also, these implementations have access to the variables around them, like the 2nd call below accessing "var" thisIsMutable and not a "val" (which is final)
+
+fun main(args: Array<String>) {
+    wantsSomeInterface(object : SomeInterface {
+        override fun mustImplement(num: Int) = "this is from mustImplement my int: ${num * 100}"
+    })
+
+    var thisIsMutable = 45
+
+    wantsSomeInterface(object : SomeInterface {
+        override fun mustImplement(num: Int): String{
+            thisIsMutable++  
+            return "this is from mustImplement my int: ${num * 100}"
+        }
+    })
+}
+
+
+interface SomeInterface {
+    fun mustImplement(num: Int): String
+}
+
+fun wantsSomeInterface(si: SomeInterface) {
+    println("printing from SomeInterface ${si.mustImplement(22)}")
+}
+
+we can all have multiple interfaces:
+wantsSomeInterface(object : SomeInterface, SomeInterface2, SomeInterface3... etc
+
+Enums
+-----
+Very similar to Java
+enum class Department2(val fullName: String, val numEmployees: Int) {
+    HR("hr", 5),
+    IT("it", 7),
+    ACCOUNTING("acc", 12),
+    SALES("sal", 20);
+
+    fun getDepInfo() = "$fullName and $numEmployees"
+}
+
+READ MORE HERE: https://www.baeldung.com/kotlin/enum#overview
+
+imports
+-------
+imports in kotlin do not have to match to directory structure the same way file names do not have to match the class name
+for example, at the top of the file, you can have
+package bla.blo.bli
+while the folder names are bla -> blo -> juju
+will still work fine
+
+Recommended Way: do it like java, conserve the directory structure
+
+If we are dealing with another module (not a package), we will need to add the module as dependency from the project's settings
+then, we will be able to import from its files
+
+for enums, we actually import an individual enum, but usually, we would want to import the entire class
+enums can be aliased, using "as":
+import bla.blo.bli.SomeClass as blu
+
+as can be used with functions as well
+
+extension functions have to be imported if we want to use them in other files
+
+Internal Access modifier
+------------------------
+"internal" access modifier make a top level function for example accessible from any other file in the same module
+BUT files in other modules, even if the file with the internal function is being imported, can not access it
