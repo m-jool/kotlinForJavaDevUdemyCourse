@@ -165,10 +165,10 @@ in Kotlin, you can not do this. To do use, you use .toChar() => same concept as 
 the Kotlin types compile to Java's primitive types and not the type wrapper classes
 
 Void: in Java a method that returns void actually returns nothing
-in koltin, what gets returns i called unit, unit is a thing unlike java
-unit => singleton instance
+in koltin, what gets returned is called Unit, Unit is a thing unlike java
+Unit => singleton instance
 
-in Koltine there is class called nothing, which is a subclass of every class
+in Koltine there is class called Nothing, which is a subclass of every class
 => use case: function that never returns (has an infinite loop) => this is how we tell the compiler this
 
 Arrays
@@ -691,3 +691,214 @@ Internal Access modifier
 ------------------------
 "internal" access modifier make a top level function for example accessible from any other file in the same module
 BUT files in other modules, even if the file with the internal function is being imported, can not access it
+
+Loops, IF, When and Try/Catch
+=============================
+Loops
+-----
+The classic Java for loop is not available in Kotlin
+in kotlin, we use ranges, and the start and end are inclusive
+
+val range = 1..5
+val range = 'a'..'z'
+val range = "ABC".."XYZ"
+
+=> any type that is "Comparable" can be used in a range
+that is because of the "in" operator which is used by the loop
+
+val backwardsRange = 5.downTo(1) // OK
+val backwardsRange2 = 5..1 // backwards rand this way does not work
+this translates to 5 <= x <= 1: as a logical statement, this is alwasy false
+
+// another way of reversing a range to go backwards
+val reversedRange = range.reversed()
+most of these methods can only be used with numerical and char ranges
+
+val rangWithSteps = 3..15
+val stepThree = rangWithSteps.step(3) // returns a range
+you can write it like this: val rangWithSteps = (3..15).step(3)
+or like this: val rangWithSteps4 = 3..15 step 4
+
+// another way of reversing a range to go backwards
+val reversedRange = range.reversed()
+
+String ranges do not have an interator defined on them
+val range = "ABC".."XYZ" => can contain values like "CCC" and "CCCCCCCCCCCCCC" (comparison happens one char at a time)
+
+Strings however have iterators defined on them:
+val str = "hello"
+for (c in str) {
+    println(c)
+}
+
+// loop with step size
+for (num in 1..20 step 4) {
+        println(num)
+}
+
+// loop backwards with step size
+for (num in 20 downTo 15 step 2) {
+    println(num)
+}
+
+you can use the keyweird "until", it excludes the final element in the range
+
+val range = 0..str.length
+
+we can also use !in => not in with strings, numbers and chars
+
+val seasons = arrayOf("spring", "summer", "autumn", "fall")
+seasons.forEach { println(it) }
+seasons.forEachIndexed { index, value -> println("$index is $value") }
+for (index in seasons.indices) {
+    println("$index is ${seasons[index]}")
+}
+
+for (i in 1..3) {
+    println(i)
+    jloop@ for (j in 1..4) { // we can give loops a name
+        println(j)
+        for (k in 1..10) {
+            println(k)
+            if (k == 7) {
+                break; // breaks only the k loop
+                // if we want to break as the jloop, we 1st give it a name then
+                // break@jloop;
+                // also works with continue
+            }
+        }
+    }
+}
+
+IF statement
+------------
+ifs can have a return value
+
+// turnary operator does not exist in kotlin
+val z = if (x == 5) 6 else 7
+
+val v = if (x == 5) {
+    println(x)
+    6
+} else {
+    println("bla")
+    7
+}
+
+when the IF returns a value, it is an expression
+when it does not, it is a statement
+
+// can also be nested in string templates
+println("blabla ${if (x == 5) 6 else 7}")
+
+When
+----
+x = 600
+when (x) {
+    100 -> println(100)
+    200, 600 -> println(200) // we can have multiple cases
+    300 -> println(200)
+    else -> println("no match")
+}
+
+x = 220
+when (x) {
+    100 -> println(100)
+    in 200..250 -> println("in range") // we can have ranges
+    300 -> println(200)
+    else -> println("no match")
+}
+
+x = 330
+val y = 30
+when (x) {
+    100 -> println(100)
+    in 200..250 -> println("in range")
+    300 + y -> println(300) // we can also use expressions
+    else -> println("no match")
+}
+
+// Smart casting in play
+when (something) {
+    is String -> println(something.uppercase()) // smart casting happening here: type is Any, but compiler knows it is a String because of condition check
+    is BigDecimal -> println("big D")
+}
+
+we can also have
+
+val z = when (something) {
+    is String -> println(something.uppercase()) // smart casting happening here: type is Any, but compiler knows it is a String because of condition check
+    is BigDecimal -> println("big D")
+    else -> print("bla") // else here is mandatory, z MUST have a value, in this case the return value will be "Unit"
+}
+
+we can have retur values:
+val z = when (something) {
+    is String -> { 
+            println(something.uppercase())
+            1 // this would be the return value if "something" was a string: return value must allways be the last line
+    } 
+    is BigDecimal -> println("big D")
+    else -> print("bla") // else here is mandatory, z MUST have a value, in this case the return value will be "Unit"
+}
+
+When userd with enums:
+val season = Season.FALL
+val str = when (season) {
+    Season.FALL -> "it is fall"
+    Season.SUMMER -> "it is summer"
+    else -> "dunno man" // if all the possible enum values are listed, then the else would not be needed
+}
+
+println(str)
+
+"when" can be used as an alternative to if else => used without an input value
+when {
+    x < y -> do this
+    x == y -> dot that
+    else -> finish it
+}
+
+Try / Catch
+-----------
+
+fun getNumber(str: String): Int {
+    // like other blocks, the last expression's value can serve as a return value
+    return try {
+        Integer.parseInt(str) // returns the result of this
+    } catch (ex: NumberFormatException) {
+        0 // returns zero
+    } finally { // like java, always executes
+        println("finally!")
+    }
+}
+
+// nullable return type
+fun getNumber2(str: String): Int? {
+    // like other blocks, the last expression's value can serve as a return value
+    return try {
+        Integer.parseInt(str) // returns the result of this
+    } catch (ex: NumberFormatException) {
+        null
+    } finally { // like java, always executes
+        println("finally bla!")
+    }
+}
+
+// re-throw / chain exception
+fun getNumber3(str: String): Int {
+    // like other blocks, the last expression's value can serve as a return value
+    return try {
+        Integer.parseInt(str) // returns the result of this
+    } catch (ex: NumberFormatException) {
+        throw IllegalArgumentException("twas bad bro", ex)
+    } finally { // like java, always executes
+        println("finally bla!")
+    }
+}
+
+Use case for "Nothing" type
+here, we know the function below, in its current state, that it will return nothing, so we use return type "Nothing"
+fun notImplementedYet(something: String): Nothing {
+    throw IllegalArgumentException("implement me!")
+}
