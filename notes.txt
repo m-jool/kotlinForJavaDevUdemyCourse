@@ -1682,3 +1682,73 @@ open class Car2 {}
 class Toyota : Car2() {}
 
 class Ford : Car2() {}
+
+File / IO
+=========
+Kotline does not have its own IO classes
+it uses the ones that comes with Java
+
+REFER TO FOLLOWING LINK FOR THE FULL DOCS
+Kotlin added extension function so that the code can be written in a kotlin way
+https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.io/#extensions-for-external-classes
+
+By default, the char set is UTF-8, but we can pass a new one as a parameter to these Functions
+
+Make is a habit of checking the function definition: "right click -> declaration (IDE)"
+readLines() for example => it tells you not to use for large files
+
+Most function close the reader, but some will tell you (in their docs in the IDE) that it is your responsability to close the reader
+
+NOTE: for binary files, the length - generaly 2 bytes long - (the weird characters that show up) of a binary string is written in front of it so we can know what it is when parsing 
+
+File("testfile.txt").reader()
+// Equivalent to:
+// new InputStreamReader(new FileStreamReader(new File("testfile.txt)), "UTF-8")
+
+val lines = File("testfile.txt").reader().readLines()
+lines.forEach{println(it)}
+
+val reader = File("testfile.txt").reader()
+val linesAsString = reader.readText()
+println(linesAsString)
+reader.close()
+
+// .use{...} for example closes the reader whether an exception is thrown or not
+// .use{...} require calling with an object that implement auto-closable
+// we can use .bufferedReader instead of reader
+val moreLines = File("testfile.txt").reader().use { it.readText() }
+println(moreLines)
+// we also have a readText() extension function for the File class directly, and this one will close the file
+// PS: the "use" and its sister functions are similar to Java's try with resources, there is no direct try-with-resources in Kotlin
+
+File("testfile.txt").reader().forEachLine { println(it) }
+
+// useLines -> produces a sequence, so we need to terminate it (i.e something that does not return a sequence )
+File("testfile.txt").reader().useLines { it.forEach { println(it) } }
+
+// Binary Files
+val bi = DataInputStream(FileInputStream("testfile.bin"))
+var si: String
+
+try {
+    while (true) {
+        si = bi.readUTF()
+        println(si)
+    }
+} catch (e: EOFException){
+
+}
+
+// walking the file tree
+// the walk functions are return a sequence of files
+File(".").walkTopDown().forEach { println(it) }
+File(".").walkBottomUp().forEach { println(it) }
+
+println("-------------")
+File(".").walkTopDown()
+    .filter { it.name.endsWith(".kt") }
+    .forEach { println(it) }
+
+
+Kotlin Java interoperability
+============================
