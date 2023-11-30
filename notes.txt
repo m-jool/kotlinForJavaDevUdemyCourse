@@ -184,6 +184,8 @@ val with arrays: will contain a reference to the array that can not be changed, 
 we can also create mixed type arrays (results in an array on "Any")
 when passing arrays to java functions that require primitive arrays: (int[] myArr), you need to use the special Kotlin type arrays
 like intArrayOf(...), doubleArrayOf(...)
+arrayOf(1,2,3) => the types here are "Int"
+intArrayOf(1,2,3) => the types can be passed to java methods that expect array of primitives and not arrays of wrapper classes (in this case "Integer")
 
 When dealing with the general array constructor, if you provide the size, you HAVE to provide the values
 when dealing with the primitive array constructors, it will be initialized for you
@@ -902,3 +904,749 @@ here, we know the function below, in its current state, that it will return noth
 fun notImplementedYet(something: String): Nothing {
     throw IllegalArgumentException("implement me!")
 }
+
+Generics, Collections and Lambda Expressions 
+============================================
+lambdas
+-------
+A VERY NICE SUMMARY OF LAMBDA SYNTAX:
+https://medium.com/@s.badamestani/lambda-in-kotlin-a6fc055a2c88
+
+val employees = listOf(
+    Employee("john", "bla", 2010),
+    Employee("Bro", "El Sis", 1080)
+)
+
+println(employees.minBy { e -> e.startYear })
+println(employees.minBy({ e -> e.startYear }))
+println(employees.minBy { e: Employee -> e.startYear })
+println(employees.minBy { it.startYear })
+
+you can move a lambda outside of a the () if it is the last parameter in the function call
+you can also specify the type of the argument the lambda is taking if needed
+When there is only 1 parameter and the compiler can infer the type, we can use "it"
+
+When you use a lambda within a function, it can also access properties declared in the function's body (local ones)
+note: the variables must be declared before the lambda of course
+
+fun myFun(){
+    var bla = 5 // => this is var, so it is mutable, in Java you can only access final local variables in anonymous classes
+
+    // the run lambda function
+    run {
+        println(bla)
+    }
+}
+
+// Function parameters can also be accessed
+// but they can not be changed like above: so we can not change the value of "num" for example
+fun useParamter(employees: List<Employee>, num: Int) {
+    employees.forEach {
+        println(it.firstName)
+        println(it.startYear)
+    }
+}
+
+you can access a Member reference in place of a lambda expression when all it does is access a property or call a top level function that does not take any parameters
+println(employees.minBy(Employee::startYear )) => here we use (...) instead of {...}
+
+fun topLeve() {
+    println("i am top level")
+}
+
+run(::topLeve)
+
+
+Receiver Objects
+----------------
+the with function
+-----------------
+takes and instand and a lambda expression
+the instance itself no longer needs to be reference inside it
+
+fun countTo100(): String {
+    val numbers = StringBuilder()
+    for (i in 1..99) {
+        numbers.append(i)
+        numbers.append(", ")
+    }
+    numbers.append(100)
+    return numbers.toString()
+}
+
+fun countTo100WithLambda(): String {
+    val numbers = StringBuilder()
+    
+    return with(numbers) {
+        for (i in 1..99) {
+            append(i)
+            append(", ")
+        }
+        append(100)
+        toString()
+    }
+}
+
+With converst the instance into a receiver object. Said recived object can also be referd to with "this."
+we can also do this:
+return with(StringBuilder()) {...
+
+fun countTo100WithLambda(): String = with(StringBuilder()) {
+                                        for (i in 1..99) {
+                                            append(i)
+                                            append(", ")
+                                        }
+                                        append(100)
+                                        toString()
+                                    }
+
+The apply function works like "with" but it always returns the reciever object
+
+fun countTo100ApplyLambda3(): String =
+    StringBuilder().apply() {
+        for (i in 1..99) {
+            append(i)
+            append(", ")
+        }
+        append(100)
+        toString()
+    }.toString()
+
+NOTE: also() function works like apply() but you use "it" instead of "this"
+
+returning from lambda
+---------------------
+PS: inline functions get their point of call replaced with their body, for example:
+val numbers = listOf(1, 2, 3, 4, 5)
+numbers.each { println(it) }
+
+=> given that each is inlined, then the above translates to:
+val numbers = listOf(1, 2, 3, 4, 5)
+for (number in numbers)
+    println(number)
+
+if you look at the documentation of forEach in intelliJ, it says:
+public inline fun <T>...
+
+Examples:
+
+fun findByLastName(employees: List<Employee>, name: String) {
+    for (employee in employees) {
+        if (employee.lastName == name) {
+            println("YES, found")
+            return
+        }
+    }
+
+    println("found none")
+}
+
+fun findByLastName2(employees: List<Employee>, name: String) {
+    employees.forEach {
+        if (it.lastName == name) {
+            println("YES, found")
+            return // the return here also returns from the function and not the lambda
+            // this kind of return works only when function that is taking the lambda is inlined
+            // forEach is taking the lambda as an paramter and forEach is inlined
+            // such a return is called, non-local returns
+        }
+    }
+
+    println("found none")
+}
+
+in Order to do a local return, we use labels:
+fun findByLastNameLocalReturn(employees: List<Employee>, name: String) {
+    employees.forEach returnBlock@{
+        if (it.lastName == name) {
+            println("YES, found")
+            return@returnBlock
+        }
+
+        println("found none")
+    }
+}
+
+Labels to access different reciever objects
+-------------------------------------------
+"some String".apply someString@ {
+    "another String".apply {
+        println(toLowerCase()) // tagets "another string as receiver object"
+        println(this@someString.toUpperCase()) // tagets "some string as receiver object"
+    }
+}
+
+Lists and Sets
+--------------
+Collections in Kotlin:
+public interface Collection <out E>: Iterable<E>
+= using out: it is covarient => discussed later
+Can not be modifed: Read only
+
+Arrays are in the Kotlin package and not in the kotlin.collections package
+it is considered a collection but it kinda stands on its own
+
+val strins = listOf("spring", "summer", "fall", "winter")
+list is an interface, but what is the Concrete class (i.e a class that we can instantiate)?
+class java.util.Arrays$ArrayList => kotlin makes this immutable
+kotlin enforces immutability using interface definitions
+but if passed to java, then it becomes mutable, bcz in java, it is mutable
+
+val emptyList = emptyList<String>()
+class kotlin.collections.EmptyList => here there are no java classes backing it
+emptyList.isEmpty() => function to check if list is empty
+
+val notNullList = listOfNotNull("hello", null, "good bye") => nulls get cleaned out
+println(notNullList)
+
+val arrayList = arrayListOf(1, 2, 3)
+println(arrayList.javaClass) => class java.util.ArrayList: classic java mutable list
+
+val mutableList = mutableListOf<Int>(1, 2, 3)
+println(mutableList.javaClass) => also results in a java.util.ArrayList
+
+val list = listOf(*array) // we use the "*" spread operator to unpack an array, else we get a lis where the 1st element is an array itself
+we can also use: val list2 = array.toList()
+
+with lists you can use set and get Functions (or accessors)
+println(mutableList)
+println(mutableList.get(1))
+mutableList.set(1, 5)
+println(mutableList)
+println(mutableList.get(1))
+
+you can also use:
+.last() => gets last element
+.first() => gets 1st element
+
+// returns the list reversed
+.reversed()
+.asReversed()
+
+println(stringsList.getOrNull(5))
+println(stringsList.getOrElse(5) { it -> it * 10 })
+
+val intsList2 = listOf(1, 5, 6, 2)
+intsList2.max() => get biggest value (in this case, it is 6)
+
+colorList.zip(stringsList) => creates a list of pairs
+[(black, spring), (while, summer), (green, fall)] => if the lists are not equal in size, additional elements get dropped of
+
+pairs are a kotlin element Pair<A, B>
+
+val combinedLists = colorList + stringsList => this wil concatenate the lists together
+
+val noDupsList = colorList.union(stringsList) => filteres out duplicates from the resulting list
+
+val noDupColors = colorList.distinct() => we can remove the dups from a list
+
+Some functions apply on the list and some return a new list
+
+val mutableSeasons = stringsList.toMutableList() => we can create a mutable list from an immutbable list
+mutableSeasons.add("some other season")
+println(mutableSeasons)
+
+Maps 
+----
+val immutableMap: Map<Int, Car> = mapOf(
+    1 to Car("blue", "toyota", 2016),
+    2 to Car("red", "ford", 1990),
+    3 to Car("green", "bmw", 2006),
+)
+
+ => "key" to "value"
+
+printing the java class and the value of the above:
+class java.util.LinkedHashMap
+{1=Car@7a79be86, 2=Car@34ce8af7, 3=Car@b684286}
+
+result will be the same if we use "mutableMapOf(...)"
+
+val hashMap = hashMapOf(
+=> class java.util.HashMap
+
+for maps we can use "put()" and "get()"
+
+Destructuring declarations
+--------------------------
+val pair = Pair(10, "ten")
+val value1 = pair.first
+val value2 = pair.second
+
+// we destructrured or distributed an instance
+val (valueA, valueB) = pair
+
+Another Example:
+for (entry in mutableMap) {
+    println(entry.key)
+    println(entry.value)
+}
+
+for ((key, value) in mutableMap) {
+    println(key)
+    println(value1)
+}
+
+custom destructuring
+--------------------
+Thie requires the implementation of component functions, i.e you do not get it out of the box
+keyword: operator in front of "fun"
+
+val car = Car("red", "bmw", 1994)
+val (color, model, year) = car
+
+class Car(val color: String, val model: String, val year: Int) {
+    operator fun component1() = color
+
+    operator fun component2() = model
+
+    operator fun component3() = year
+}
+
+the properties need to be public ofcourse
+
+Exception: data classes
+in addition to equals and toString functions, they get component function for free
+
+Sets
+----
+val setInts = setOf(1, 2, 3, 4, 5, -20)
+println(setInts)
+println(setInts.plus(20))
+.plus(...) adds to a set, but in this case the set is immutable, to this will results in a new set containing 20
+Same will apply for .minus(...)
+
+val mutableSetInts = mutableSetOf(1, 2, 3, 4 - 10) => in this case, we use mutable set
+mutableSetInts.add(30)
+mutableSetInts.remove(3)
+println(mutableSetInts)
+
+we can also do some other actions on the sets:
+mutableSetInts.average()
+mutableSetInts.drop(2) => drops the 1st 2 entries
+
+setInts.filter { it % 2 != 0 }
+when the predicate is true, the item is added to the resulting set
+
+immutableMap2.filter { it.value.year < 2010 }
+"it" here is the map entry (key, value) pair
+
+val add10List: MutableList<Int> = mutableListOf()
+=> in this case, you need to specify the type in case you are not providing any initial values
+
+the "map" functions:
+val ints = arrayOf(1, 2, 3, 4, 5)
+val add10List2 = ints.map { it + 10 }
+returns a collection containing an entry for each of the entry in the object it is acting on
+=> it returns a list and not a map
+
+immutableMap2.map { it.value.year }
+=> we can also apply to the iterable entry in a map
+
+we can chain these of course
+immutableMap2.map { it.value.year }
+immutableMap2.filter { it.value.model == "ford" }.map { it.value.color }
+
+Check if all/any the items match a condition:
+immutableMap2.all { it.value.year > 2014 }
+immutableMap2.any { it.value.year > 2014 }
+
+We can also count:
+immutableMap2.count { it.value.year > 2014 }
+
+We can get all the values of a map into a list
+val cars = immutableMap2.values
+
+returns the 1st item that satisfies this condition
+cars.find { it.year > 2014 }
+
+cars.groupBy { it.color }
+{blue=[Car@614c5515], red=[Car@1e67b872, Car@3f2a3a5], green=[Car@60addb54]}
+
+immutableMap2.toSortedMap() => sorts by key
+cars.sortedBy { it.year } => we can specify when we wana sort with
+
+Sequences
+=========
+When we multi-chain function calls on collections, each time, an intermediate collection instance is created
+what if these collections were huge? (memory/performance concerns)
+
+Sequences are similar to Java Streams
+When dealing with collections, the collection is dealt with a whole, then passed on as a whole
+with Sequences, each items is enumrated and can be acted-on/evaluated on its own, then passed on to the next step or chained function
+(whe applicable of course)
+=> that way there is no need to create intermediate collections
+
+Streams or Sequences should only be used with large Collections
+Sequence in kotline are quite efficient
+immutableMap2.asSequence().filter { it.value.model == "ford" }.map { it.value.color }
+simply add a .asSequence() call
+
+we can perform 2 type of operations on sequences, intermediate and terminal
+each intermediate step returns a sequence which is passed to the next step
+when done, we want to do a terminal operations and terminate the chain and get something concrete
+
+Sequences are lazily evaluated, meaning that they are not evaluated until a terminal operation takes place
+listOf("joe", "john", "jane")
+        .asSequence()
+        .filter { println(it); it[0] == 'j' }
+        .map { println(it); it.uppercase() }
+=> in the example above, nothing gets printed because filter and map are intermediate operations, they return sequences
+if we add at the end: .toList() => this returns a list and not a sequence, thus it is considered a terminal operation
+
+The print output will be:
+joe
+joe
+john
+john
+jane
+jane
+=> notice that each entry in goes through the full pipeline (.filter() it gets printed, then .map() and it gets printed again)
+if within the chain, an intermediate operation returns fals or skips some entry (like .filter()), the item does not continue down the chain (or pipeline)
+
+using the find() function (terminal op), it will return the moment it matches the 1st time, so the rest of the data withint the stream does not get processed
+
+When working with collection instead of sequences, the order of the functions matter
+since the resulting collection will be passed
+
+NOTE: When creating chains, take a look at it, and optimize which function to call 1st. it can help reduce processing
+
+Generics
+========
+fun printCollection(collection: List<String>) {
+    for (item in collection) {
+        println(item)
+    }
+}
+
+// <T> => type parameter declaration: In this case, the boundary is "Any?" => nullable Any, since any calss decends from it
+// to make this not accept non-nullable types, we do: <T: Any> (no question marks here)
+fun <T> genericPrintCollection(collection: List<T>) {
+    for (item in collection) {
+        println(item)
+    }
+}
+
+// We can also do extension function
+fun <T> List<T>.extendedGenericPrintCollection() {
+    for (item in this) {
+        println(item)
+    }
+}
+
+Generic Type: class or interface
+Generic function : like the example above "genericPrintCollection"
+Parametrized types: when the type parameter is a generic type, for example:
+- Bla<List<T>>
+- Bla<Blo<T>>
+- Bla<N> where N is Blo<T>
+
+// Boundaries: Bounded Types
+fun <T : Number> converToNumber(collection: List<T>) {
+    for (item in collection) {
+        println(item.toInt()) // we need to add a boundary else we can not call .toInt() on item
+    }
+}
+
+// Boundaries: Multiple Boundaries => when T needs to satisfy multiple conditions
+fun <T> appendChars(item1: T, item2: T)
+        where T : CharSequence, T : Appendable {
+    println(item1.append(item2))
+}
+IMPORTANT: We can have multiple interfaces as conditions, but only 1 class
+
+// Boundaries: Bounded Types can be nullable
+fun <T : Number?> converToNumber(collection: List<T>) {
+    for (item in collection) {
+        println(item?.toInt())
+    }
+}
+IMPORTANT the collection itself being passed does not have to have null entries in this case, but it can have them
+the collection itself, when declared to accept nulls, for example: List<Short?>
+
+Type Erasure
+------------
+At compile time, generic info is erased.
+Generics are there to help us type less only, but the generated application will not have this information
+
+In java
+List<String> strings = new ArrayList<>();
+strings.add("hello");
+
+// We can not do the bellow, the JVM will not have this information
+// boolean b = strings instanceof List<String>;
+// But we can do:
+boolean b = strings instanceof List;
+
+Th JVM knows if a collection is a collection but can not know what type it has
+
+in kotlin:
+val strings = listOf("1", "2", "bla")
+if (strings is List<String>) {
+    println("strings is a List<String>")
+}
+the above works, probably because the compiler at compile time knows that this check alwasy resolves to true
+to the byte code of the "if" statement does not get generated
+
+val strings = listOf("1", "2", "bla")
+if (strings is List<String>) {
+    println("strings is a List<String>")
+}
+
+val list: List<Any> = listOf("str1", "str2")
+// The bellow shows an error: can not check for instance of erased type
+// if (list is List<String>) {
+//     println("list is a List<String>")
+// }
+
+// the below is like Java, it works
+if (list is List) {
+    println("list is a List")
+}
+
+var listAny: Any = listOf("str1", "str2")
+// The below does not work, in Kotlin, you must always specify the type
+// if (list2 is List) {
+//     println("list is a List")
+// }
+// so we use "*" => star projection syntax, it sort of acts like a wild card
+if (listAny is List<*>) {
+    println("list2 is a List, thank you star projection")
+}
+
+// as operator can be used for casting
+// of course here, smart casting is happening: list2 (Any) is known to be a List of something
+if (listAny is List<*>) { // here we are checking that list2 is a list of anything
+    println("list2 contains strings")
+    val strList = listAny as List<String>
+    println(strList.get(1).replace("str", "string"))
+}
+
+// thus, given the above, the below code triggers a java.lang.ClassCastException
+listAny = listOf(1, 2, 3)
+if (listAny is List<*>) { // here we are checking that list2 is a list of anything
+    println("list2 contains strings")
+    val strList = listAny as List<String>
+    println(strList.get(1).replace("str", "string"))
+}
+
+NOTE: if we check the compiler messages (Problems tab), it will tell us that it has there is an unchecked case from Any to List<String>
+
+Reified parameters
+------------------
+reification is a kotlin feature
+reified infline functions prevent the generic type from being erased at runtime
+thus we will be able to check on it, using if() for example:
+if (element is T) {...}
+
+inline fun <reified T> getElementsOfType(list: List<Any>): List<T> {
+    var newList: MutableList<T> = mutableListOf()
+    for (element in list) {
+        if (element is T) {
+            newList.add(element)
+        }
+    }
+
+    return newList
+}
+
+ONLY use reification if you need to check a type
+you can not use reification with non inline functions, classes, properties... etc
+you can not use T to create a new instance
+
+
+Variance
+--------
+covariance 
+----------
+
+List is class
+List<String> is a Type
+List<Number> is a Type
+List<Int> is a Type, it is Sub-Type of List<Number>
+They are not sub-classes as we are not extending anything here
+(same goes for super-type)
+
+one wrinkle to note here are nullable types, they are a wider type than non-nullable types
+meaning that if we have a nullable type, we can store non-nullable types in it, but not the inverse
+
+fun main(args: Array<String>) {
+    val shortList: List<Short> = listOf(1, 2, 3, 4, 5)
+    convertToInt(shortList)
+
+    val mutableShortList: MutableList<Short> = mutableListOf(1, 2, 3, 4, 5)
+    mutableConvertToInt(mutableShortList) => this will show an error
+}
+
+fun convertToInt(collection: List<Number>) {
+    for (num in collection) {
+        println(num.toInt())
+    }
+}
+
+fun mutableConvertToInt(collection: MutableList<Number>) {
+    for (num in collection) {
+        println(num.toInt())
+    }
+}
+
+we are able to do this with immutable lists. when we want to pass a List<Short> to a List<Number>, with the later being a superty of the former
+and we want this subtyping to be preserved when deealing with generics, we have to declare the type as covariant
+
+thus, an immutable collection is covariant and mutable list is not
+
+// Example on variance
+fun waterGardern(garden: Garden<Flower>) {}
+
+fun tendGarden(roserGarden: Garden<Rose>) {
+    waterGardern(roserGarden)
+    // the above gives a Type mismatch error
+    // Required: Garden<Flower>
+    // Found: Garden<Rose>
+    // this happens because the garden class is invariant
+    // we need to make it covariant: so we add the keyword out to class Garden<T : Flower> {}
+
+}
+
+open class Flower {}
+
+class Rose : Flower() {}
+
+class Daisy : Flower() {}
+
+// a covariante comes with restrictions (like immutable classes)
+// we can only use a covariant class in the "out" position
+// function parameters are "in" position
+// function return type are "out" position
+class Garden<out T : Flower> {
+    val listOfFlowers: List<T> = listOf()
+
+    fun pickFlower(i: Int): T {
+        return listOfFlowers.get(i)
+    }
+    // you can write the above as fun pickFlower(i: Int): T = listOfFlowers[i]
+
+    // the below Type parameter T is declared as 'out' but occurs in 'in' position in type T
+    // these concern member function, so passing a rose garden as a parameter to tendGarden(...) is OK
+    // because there is nothing in it that affects the list of flowers
+    // fun plantFlower(flower: T) {}
+    // So why the restriction?
+    // Because: nothing stops calling the plantFlower function with a "daisy" when we have a "rose" garden
+}
+
+Example (following up on the above):
+val mutableShortList: MutableList<Short> = mutableListOf(1, 2, 3, 4, 5)
+mutableConvertToInt(mutableShortList) => this will show an error BUT... (check below)
+fun mutableConvertToInt(collection: MutableList<Number>) {
+    for (num in collection) {
+        println(num.toInt())
+    }
+    collection.add(25) => here, this will no get underlined in red, it will not show an error
+    but if you notice, we would literally be adding a integer to a list of Shorts since the subtypiong is preserved
+    that is why List does not have an add() function, because then, it opens it up for these kind of shenanigans
+}
+
+If you check the mutable list vs list class, you will notice that the later has the out keyword
+
+you can use the type in the "in" position as such:
+fun myFun(element: @UnsafeVariance T): SomeReturnType {...} only if myFun changes nothing about the instance's data,
+but you have to be ABSOLUTLY SURE (like the !! operator)
+
+NOTE: 
+constructor paramters do not have in and out positions, they are called with an instance is created
+Also, with "out", we have to use val and not var
+with var, kotlin will generate a setter, which means a "in" position
+private functions and properties do not have in and out positions also; not available to the outside world
+so "private var" would work
+
+do not confuse passing a rose graden to a method that takes a rose garden (subtype) vs one that takes a flower garden
+functions declared as part of the class usually do not face this issue because of type erasure
+
++++++++++++
+covariance: we want subtype to be preserved => we are looking down the Inheritance tree
+contravariance: we want supertype to be preserved => we are looking down the Inheritance tree
+
+Flower -> Rose
+Flower -> Tulip
+Vs.
+Flower <- Rose => as if saying, Rose is now the supertype of Flower
+Flower <- Tulip => as if saying, Tulip is now the supertype of Flower
+
+but the proper way to think about is Rose and anything above it, so in the example above
+tulip is not above rose
++++++++++++++++
+
+contravariance
+--------------
+contravariance appear in the "in" position
+contravariance will also come with its own limitations, we can not read from them, on write
+i.e "T" can only be used as input but not as a return type for a function for example
+Sinc we can now mutate our instance, if we could return type T, then tis will not garentee that we will get the type we want
+because we can return any flower from the garden no matter what it is, because we are returning the parent class Flower
+
+it is ok to treat a rose like a flower
+but it is not ok to treat a flower like a rose (because we do not know what type of flower it is)
+i.e if a function returns a super type, we would be casting into a subtype (contra) => BAD
+val rose: Rose = rosegarden.pickFlower() => this method returns a flower and not a rose
+
+fun main(args: Array<String>) {
+    // making this an anonymous object with keyword "object"
+    val roseTender = object : FlowerCare<Rose2> {
+        override fun prune(flower: Rose2) {
+            println("I am pruning a rose")
+        }
+    }
+
+    val roseGarden = Garden2<Rose2>(listOf(Rose2(), Rose2()), roseTender)
+    roseGarden.tendFlower(0)
+
+    val daffodilTender = object : FlowerCare<Daffodil> {
+        override fun prune(flower: Daffodil) {
+            println("I am pruning a daffodil")
+        }
+    }
+
+    val daffodilGarden = Garden2<Daffodil>(listOf(Daffodil(), Daffodil(), Daffodil()), daffodilTender)
+    daffodilGarden.tendFlower(2)
+
+    val flowerTender = object : FlowerCare<Flower2> {
+        override fun prune(flower: Flower2) {
+            println("I am pruning a Flower")
+        }
+    }
+
+    // even with the above, we still can not do:
+    // val daffodilGarden2 = Garden2<Daffodil>(listOf(Daffodil(), Daffodil(), Daffodil()), flowerTender)
+    // we will geta type mismatch error
+    // after adding in to interface FlowerCare<in T> {...} below, now we can do this
+    val daffodilGarden2 = Garden2<Daffodil>(listOf(Daffodil(), Daffodil(), Daffodil()), flowerTender)
+    // now we can reduce repetition and remove the flower and daffodil tender
+}
+
+
+class Garden2<T : Flower2>(val flowers: List<T>, val flowerCare: FlowerCare<T>) {
+    fun pickFlower(i: Int) = flowers[i]
+    fun tendFlower(i: Int) {
+        flowerCare.prune(flowers[i])
+    }
+}
+
+open class Flower2 {}
+
+class Rose2 : Flower2() {}
+
+class Daffodil : Flower2() {}
+
+interface FlowerCare<in T> {
+    fun prune(flower: T) // in position
+    // fun pick(i: Int): T - out position
+}
+
+All the examples above for variance are known as "Declaration Site Variance" because we are doing it when we declare a class or an interface
+In Java we do not have "Declaration Site Variance", we only have "Use Site Variance"
+When we say Declaration site, we are usually refering to a class or interface
+
+NOTE: in general, generics types are invariant
+
+Use Site Variance
+-----------------
