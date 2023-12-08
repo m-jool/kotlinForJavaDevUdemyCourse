@@ -344,6 +344,10 @@ Constants
 val MY_CONTANT = 100 // at the top level of the file
 we use val for immutability
 
+PS: the const keyowrd can be used with koltin:
+const val x = 8
+can't be used with var, val only: const var x = 8 => compiler shows red
+
 Data Classes
 ------------
 a class that is only meant to store state
@@ -1752,3 +1756,218 @@ File(".").walkTopDown()
 
 Kotlin Java interoperability
 ============================
+When creating an instance from a java class, you simply import it and then write it kotlin style without the "new" keyword
+
+Nullability
+-----------
+@Nullable and @NotNull => documentation only: they are not inforced (written in the Java file)
+kotlin detects these and maps the objects or properties to kotlin nullable or not nullable versions of them (how to compiler it is going to treat it)
+we can set a property to null, we do not get a compiler error, but when we run we get the error (runtime error)
+
+public void setColor(@NotNull String color) {
+    this.color = color;
+}
+
+public void setColor(@Nullable String color) {
+    this.color = color;
+}
+
+default type for a java type (property comming from java) is the nullable type
+var model = JavaCar.model => model knows it is being assigned a value from java, hence it is implicitly declared as a nullable type
+if we explicitly declare model as a nullable kotlin type (var mode: String?), we can no longer do: println(model.javaClass), since model can now be null (now directly known to the kotlin compiler)
+NOTE: you can also explicitly declare the kotlin proprty as non-nullable if you are getting its value from java code
+
+in case we do not specify the Nullability in java, then the variables that are created are called platform type
+this occurs when mixing koltin with another language
+
+in kotlin we can not declare platform types, it is either known and nullable or known and not-nullable (known meaning: String, Int... etc)
+
+when we see an error message with variable name and an "!" mark, this means that we are dealing with a platform variable
+
+we can do "car.model" or "car.model" = "green" only if the field in java is private and has a getter and a setter (in kotlin, we have them by default)
+in java, they need to be defined explicitly
+if the field in java is public, then we can do it normally
+
+
+wild cards
+----------
+wild cards in java that extend some class will be converted to covariant kotlin (out)
+wild cards in java that have super some class will be converted to covariant kotlin (in)
+
+exceptions
+----------
+if we call a java method that throws and exception, we do not need to handle the exception
+because kotlin does not distinguish between checked and unchecked exceptions
+
+varargs
+-------
+public void variableMethod(int num, String... strings) {
+    for (String str: strings){
+        System.out.println(str);
+    }
+}
+
+car.variableMethod(5, "hello", "bye")
+var strings = arrayOf("hell", "bye")
+// car.variableMethod(6, strings) => can't do this, even though in Java we can and even though this is taking an array under the covers
+// we have to use the spread operator
+car.variableMethod(6, *strings)
+
+Java method returns: void => Unit in kotlin
+no primitive types => so when passing ints and doubles array to java methods... from kotlin to java, you need to use the special array: intArrayOf(....) etc
+(or convert the arrayOf() using .toIntArray() for example)
+
+When dealing with java Type: "Object" => in kotlin, it becomes "Any"
+=> in kotlin, "Any" does not have clone, wait or notify methods
+so if we want to call them, we should cast to java.lang.Object from the kotlin code
+
+Java: .getClass() => in kotlin, we just do .javaClass
+
+Static method or field
+----------------------
+in kotlin, they become companion objects
+
+SAM conversions
+---------------
+Single Abstract Method
+when a java interface has a single abtract method, we can use a lambda expression rather than an anonymous instance (as of Java 8 that is)
+Runnable interface in a SAM interface (has 1 method: run())
+
+Java Example:
+    public void demoMethod() {
+//        constructing a thread
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                System.out.println("i am in a thread");
+//            }
+//        }).start();
+
+        // same as above but using a lambda
+        new Thread(() -> System.out.println("i am in a thread")).start();
+    }
+
+Kotlin Example:
+In Java, the code is:
+public static void demoMethod2(Runnable r) {
+    new Thread(r).start();
+}
+
+calling it from kotlin:
+Car.demoMethod2({ println("i am in a thread") })
+
+of course, the function signature has to match whatever this interface is expecting
+
+Calling kotlin from Java
+------------------------
+under the covers, the compiler will generate a static class for all the top level items
+import static learn.kotlin.CarKt.topLevel; (file is called Car.kt)
+topLevel();
+
+Or:
+import learn.kotlin.CarKt
+CarKt.topLevel();
+
+what if we called the kotlin class: "CarKt" instead of "Car"?
+this will casuse a conflict, but we can change the the name of the generate file using:
+@file:JvmName("StaticCar") => you put this at the very top of the file, before everything
+the import name then changes:
+import learn.kotlin.StaticCar
+
+For extention functions,
+we can not simply to a .MyFun on the object, we will have to use it using the file/class name:
+if we had:
+fun String.print() = println(this) => this prints the string object itself
+we have to do:
+StaticCar.print("blabl blabla")
+
+when intantiating a kotlin object from java, it has to be done the class way:
+Car car = new Car("bla", "bli")
+the getter and setters will be automatically created if the class was defined in kotlin unless:
+- we used val instead of var => we only get a getter
+- private var
+
+class Car (color:String, val model: String){
+    private color: String = color
+        set(value) {
+            filed = "always green"
+        }
+}
+
+so in java, we will automatically get: car.getModel() => the IDE only gives us this option
+
+when dealing with boolean:
+the getter will be called: isMyBool() instead og getMyBool()
+
+PS: for variables with multiple words, camel casing is preserved
+
+if we want java to access a property without going through the getter and setter:
+we use the annotatil: @JvmField
+class Car (color:String, @JvmField val model: String){...}
+here, we can now do "car.model" from java
+
+@JvmField has restrictions, can not be used with:
+- private properties
+- property that overrides another property or one that can be overriden
+- constant property (when the keyword const is explicitly used in koltin)
+
+how to access functions withing companion objects?
+we must use the @JvmStatic annotation: we put this in the kotlin file
+Given: 
+class Car (val color:String, val model: String){
+    companion object {
+        fun carComp () {
+            println("i am comp obj of car")
+        }
+    }
+}
+
+doing it like this accesses the method through the instance generated by the compiler:
+Car.Companion.carComp();
+
+So... we do: @JvmStatic fun carComp () {...}
+then we can do: Car.carComp() => static call
+
+the above is cleare when dealing with singletons:
+Kotlin:
+object SingletonObject {
+    fun myFun() = println("bla")
+}
+
+Java:
+SingletonObject.INSTANCE.myFun();
+but this does no look java like, so we do:
+@JvmStatic fun myFun() = println("bla")
+then we can do:
+SingletonObject.myFun();
+
+For static proprties in the companion object, we also use @JvmField to make them accessible from Java
+
+const properties in the companion object are immediatly turned to static and does not need to be annotated
+the same applies for late initialized properties
+
+in the case below, the kotlin fun is expecting a non-null value, but we can still pass it, we get a runtime IllegalArgumentException
+// kotlin
+fun printMe(text: String){
+    println("I do not expect a null value: $text")
+}
+// java
+car.printMe(null);
+
+in kotlin, we do not need to declare that a function throws an exception while in Java we do
+so if a fun in kotlin throws one, we can call the funcation in Java and it will not ask us to put a try/catch
+because their is nothing in the compiled code that tells us an exception can be thrown
+so, we annotate the method with @Throws(Exception:class) // you can be more specific about the exception class
+@Throws(IOException::class)
+fun doIO() {
+    throw IOException()
+}
+
+with kotlin, we can functions accept default parameter values
+when the kotlin compiler compiles the code, it generates 1 version for Java, which is the one without default parameter values
+so we annotate: @JvmOverloads
+and now we get both versions of the function
+@JvmOverloads fun defaultArgs(str: String, num: Int = 25){}
+
+PS: when calling kotlin from java, if using non-nullable types, then koltin will throw an IllegalArgumentException if null is passed without
+having to add @Throws(IllegalArgumentException::class) for example
