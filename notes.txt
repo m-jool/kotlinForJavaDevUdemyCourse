@@ -8,21 +8,21 @@ In kotlin, you can write functions outside of class, in Java, you can not
 but the truth is, the compiler will then deal with boilerplate code and generate the class under the covers for us
 these functions are called top level functions because they are not defined in a class
 
-kotlinc compiles .kt files into .class files than are equivalent to the ones that javac produces and that can be read by the JVM
-to run kotlin applications, we need the kotlin runtime library which is something similr in nature to the JRE
+kotlinc compiles .kt files into .class files that are equivalent to the ones that javac produces and that can be read by the JVM
+to run kotlin applications, we need the kotlin runtime library which is something similar in nature to the JRE
 
 the JVM looks for the main(...) method signature to find the entry point of a program
-everything is class in kotlin for example Array<String>
+everything is a class in kotlin for example Array<String>
 
 Kotlin tries to reduce the amount of code we write
 for example, we write println() instead of Systemt.out.println() because kotlin imports from of this stuff from the start
 we call this the kotlin standard library
 https://kotlinlang.org/api/latest/jvm/stdlib/
-it serves the same pupose that the JDK does, it has a bunch of API for you to use
+it serves the same purpose that the JDK does, it has a bunch of API for you to use
 
-Kotlin is statically types, meaning that all variable types are known at compile time
+Kotlin is statically typed, meaning that all variable types are known at compile time
 
-kotlin: preferes stuff to be immutable than mutable vs Java, where by default, variables are mutable
+kotlin: prefers stuff to be immutable than mutable vs Java, where by default, variables are mutable
     val number3: Int
     number3 = 10
     // number3 = 11 => this will throw the error
@@ -36,7 +36,7 @@ val employee = Employee("lynn smith", 500) => no need for "new" keyword
 employee.name = "lynn jones"
 // employee.id = 5
 // val employee can not be assigned a new Employee instance (val), but that does not mean that its member variables
-// can not be changed, in this case, the name can be changed (var) but id can not
+// can not be changed, in this case, the name can be changed (var) but id (val) can not
 
 Type Aliases
 ============
@@ -45,7 +45,7 @@ by going to its definition, we see the following
 @SinceKotlin("1.1") public actual typealias StringBuilder = java.lang.StringBuilder
 => this means, that when we use StringBuilder in kotlin, we are actually using the java StringBuilder
 
-Custom Aliases can be declared => bet done at file level
+Custom Aliases can be declared => but done at file level
 declare it: typealias EmployeeSet = Set<Employee>
 use it: val employees: EmployeeSet
 
@@ -53,11 +53,11 @@ Some quick diff between Java and Kotlin
 ---------------------------------------
 kotlin does not require semicolons
 kotlin has many wrappers around some commonly used Java functions like println and System.out.println
-Hard keyowrds: Java and Kotlin => example: int, double, if...
+Hard keywords: Java and Kotlin => example: int, double, if...
 Soft keywords: Kotlin => soft keywords can be redefined where they are not being used to meet their built-in function,
 but it is not considered as a good practice
 
-square brakets can be used to access elements in collection instead of .get()
+square brackets can be used to access elements in collection instead of .get()
 => this is done in pursuit of more concise code
 concise: giving a lot of information clearly and in a few words; brief but comprehensive
 
@@ -70,8 +70,8 @@ in Java:
 == => compares instance references
 .equals(...) => override to check for structural equality
 in Kotlin:
-== => differens to the .equals() method
-=== => the triple = is what checks for referencial equality
+== => different to the .equals() method
+=== => the triple = is what checks for referential equality
 same applies for != and !==
 
 NOTE
@@ -111,7 +111,7 @@ Values of expressions can be substituted as well (you use ${...}):
 Raw Strings
 -----------
 triple quoted
-no need to escape characters (i.e it includes new line chracter, can't use \n here)
+no need to escape characters (i.e it includes new line character, can't use \n here)
 can be multiline:
 """balbalbalbalbalbalba
 lkasdjflkajsdlkfj
@@ -140,7 +140,7 @@ In koltin, everything is a class, no lower case like java
 Java: int and Integer
 Kotlin: Int
 
-With kotlin, a good practive would be to specify the variable type if it is not being assigned at its declaration
+With kotlin, a good practice would be to specify the variable type if it is not being assigned at its declaration
 the Datatypes are similar to Java
 
 In Java we can do:
@@ -155,10 +155,11 @@ val myByte: Byte = 111
 var myShort: Short
 myShort = myByte.toShort()
 
-There is only one exception: Numeric Literals, kotlin wil widen them
-val anoterInt = 5
+There is only one exception: Numeric Literals, kotlin will widen them
+val anoterInt = 5L => even thought 5 is a small number, but it has the literal L => long
+so anotherInt will be of type Long
 
-by default, float points are created as double if the type float is no speicified (or use F like L for long)
+by default, float points are created as double if the type float is no specified (or use F like L for long)
 
 for Chars, in Java you can do: char x = 65; => the value of x will be the char that maps to 65
 in Kotlin, you can not do this. To do use, you use .toChar() => same concept as the others
@@ -195,7 +196,7 @@ Null Reference in Kotlin
 kotlin has the notion of nullable type. We use "?" after the variable type
 once a variable is nullable, the operations that can be done on it become restricted
 certain string methods for example can no longer be called
-so get access to it, we do a null check => smart null check like smart casting
+to get access to it, we do a null check => smart null check like smart casting
 OR we use safe access expression str?.length => short hand for null check
 
 if (bankAccount != null) {
@@ -211,10 +212,12 @@ in kotlin, we can do: bankAccount?.country?.code?.doSomething()
 
 The Elvis Operator "?:" (cz it looks like elvis's hair when his head is tipped on the side)
 it lets us assign a default value if an expression evaluates to null
+(conditional chaining)
 
 similar to safe access, we have safe casting
 val str5 = something as? String
 once we have used safe casting, we have the possibility of getting a null, so now we have to use safe access with str5
+if "something" can not be cast into String, the the expression results in a null
 
 The NOT NULL assertion: !!
 we use this when we are absolutely sure that a variable can NEVER be null
@@ -290,7 +293,7 @@ class Employee constructor(val name: String) {
 class Employee (val name: String) {
 }
 
-we would need to add the constructor keyword back if we need to change the visibility of the primary contructor
+we would need to add the constructor keyword back if we need to change the visibility of the primary constructor
 
 // SECONDARY CONSTRUCTOR
 class Employee(val name: String) {
@@ -307,7 +310,7 @@ class Employee(val name: String) {
 // The kotlin way
 class Employee(val name: String, var fullTime: Boolean = true) {...}
 
-PS: primary contructor is not mandatory, simply write the class like you do in Java
+PS: primary constructor is not mandatory, simply write the class like you do in Java
 PS: default values can also be used in 2ndary constructors
 
 Properties:
@@ -337,31 +340,29 @@ in kotlin, if you want a custom set and get, you HAVE to write them directly aft
             field = value
         }
 
-PS: the constructors do not use the accessor methods under the hood
-
 Constants
 ---------
 val MY_CONTANT = 100 // at the top level of the file
 we use val for immutability
 
-PS: the const keyowrd can be used with koltin:
+PS: the const keyword can be used with koltin:
 const val x = 8
 can't be used with var, val only: const var x = 8 => compiler shows red
 
 Data Classes
 ------------
 a class that is only meant to store state
-proprties, setters and getters only
+properties, setters and getters only
 
 with data classes, we get some nice functions for free
 comes with its own toString() function, a custom implementation of the equals() function and a copy() function
-=> all of these of course can be overriden
+=> all of these of course can be overridden
 => any property that is not defined in the primary constructor, will not be taken into account for the methods mentioned above
 
-println(car == car2) // True: data class => by default, it does structural comparision
+println(car == car2) // True: data class => by default, it does structural comparison
 println(car === car2) // false: different instance
 
-var car4 = car.copy(year = 2016) // copy everything by change value of year property
+var car4 = car.copy(year = 2016) // copy everything but change value of year property
 
 Condition: there must be a primary constructor and it must contain at least 1 declaration (val or var)
 also, anything set in it MUST also be a declaration
@@ -387,7 +388,7 @@ vararg keyword
 fun printCars(vararg cars: Car) {...}
 restriction: we can only have 1 vararg parameter in a function signature
 If vararg was not the last parameter in the function signature, then everything that comes after is will need to be
-sent while mention the name parameters
+sent while mentioning the parameter name
 
 val numbers = arrayOf(1,2,3) => arrayOf is actually using a vararg
 
@@ -578,7 +579,7 @@ class SomeClass {
         println(privateVar)
     }
 
-// We can thing of everything inside the companion object as static
+// We can think of everything inside the companion object as static
     companion object {
         private var privateVar2 = 7
         fun accessPrivateVar(){
@@ -714,7 +715,7 @@ that is because of the "in" operator which is used by the loop
 
 val backwardsRange = 5.downTo(1) // OK
 val backwardsRange2 = 5..1 // backwards rand this way does not work
-this translates to 5 <= x <= 1: as a logical statement, this is alwasy false
+this translates to 5 <= x <= 1: as a logical statement, this is always false
 
 // another way of reversing a range to go backwards
 val reversedRange = range.reversed()
@@ -728,7 +729,7 @@ or like this: val rangWithSteps4 = 3..15 step 4
 // another way of reversing a range to go backwards
 val reversedRange = range.reversed()
 
-String ranges do not have an interator defined on them
+String ranges do not have an iterator defined on them
 val range = "ABC".."XYZ" => can contain values like "CCC" and "CCCCCCCCCCCCCC" (comparison happens one char at a time)
 
 Strings however have iterators defined on them:
@@ -747,7 +748,7 @@ for (num in 20 downTo 15 step 2) {
     println(num)
 }
 
-you can use the keyweird "until", it excludes the final element in the range
+you can use the keyword "until", it excludes the final element in the range
 
 val range = 0..str.length
 
@@ -848,7 +849,7 @@ val z = when (something) {
     else -> print("bla") // else here is mandatory, z MUST have a value, in this case the return value will be "Unit"
 }
 
-When userd with enums:
+When user with enums:
 val season = Season.FALL
 val str = when (season) {
     Season.FALL -> "it is fall"
@@ -965,7 +966,7 @@ Receiver Objects
 ----------------
 the with function
 -----------------
-takes and instand and a lambda expression
+takes and instance and a lambda expression
 the instance itself no longer needs to be reference inside it
 
 fun countTo100(): String {
@@ -991,7 +992,7 @@ fun countTo100WithLambda(): String {
     }
 }
 
-With converst the instance into a receiver object. Said recived object can also be referd to with "this."
+With converts the instance into a receiver object. Said received object can also be referred to with "this."
 we can also do this:
 return with(StringBuilder()) {...
 
@@ -1004,7 +1005,7 @@ fun countTo100WithLambda(): String = with(StringBuilder()) {
                                         toString()
                                     }
 
-The apply function works like "with" but it always returns the reciever object
+The apply function works like "with" but it always returns the receiver object
 
 fun countTo100ApplyLambda3(): String =
     StringBuilder().apply() {
@@ -1051,7 +1052,7 @@ fun findByLastName2(employees: List<Employee>, name: String) {
             println("YES, found")
             return // the return here also returns from the function and not the lambda
             // this kind of return works only when function that is taking the lambda is inlined
-            // forEach is taking the lambda as an paramter and forEach is inlined
+            // forEach is taking the lambda as an parameter and forEach is inlined
             // such a return is called, non-local returns
         }
     }
@@ -1071,12 +1072,12 @@ fun findByLastNameLocalReturn(employees: List<Employee>, name: String) {
     }
 }
 
-Labels to access different reciever objects
+Labels to access different receiver objects
 -------------------------------------------
 "some String".apply someString@ {
     "another String".apply {
         println(toLowerCase()) // tagets "another string as receiver object"
-        println(this@someString.toUpperCase()) // tagets "some string as receiver object"
+        println(this@someString.toUpperCase()) // targets "some string as receiver object"
     }
 }
 
@@ -1084,13 +1085,13 @@ Lists and Sets
 --------------
 Collections in Kotlin:
 public interface Collection <out E>: Iterable<E>
-= using out: it is covarient => discussed later
-Can not be modifed: Read only
+= using out: it is covariant => discussed later
+Can not be modified: Read only
 
 Arrays are in the Kotlin package and not in the kotlin.collections package
 it is considered a collection but it kinda stands on its own
 
-val strins = listOf("spring", "summer", "fall", "winter")
+val strings = listOf("spring", "summer", "fall", "winter")
 list is an interface, but what is the Concrete class (i.e a class that we can instantiate)?
 class java.util.Arrays$ArrayList => kotlin makes this immutable
 kotlin enforces immutability using interface definitions
@@ -1109,7 +1110,7 @@ println(arrayList.javaClass) => class java.util.ArrayList: classic java mutable 
 val mutableList = mutableListOf<Int>(1, 2, 3)
 println(mutableList.javaClass) => also results in a java.util.ArrayList
 
-val list = listOf(*array) // we use the "*" spread operator to unpack an array, else we get a lis where the 1st element is an array itself
+val list = listOf(*array) // we use the "*" spread operator to unpack an array, else we get a list where the 1st element is an array itself
 we can also use: val list2 = array.toList()
 
 with lists you can use set and get Functions (or accessors)
@@ -1124,14 +1125,17 @@ you can also use:
 .first() => gets 1st element
 
 // returns the list reversed
-.reversed()
-.asReversed()
+.reversed() -> creates a new lists, so any changes to the original list is not reflected here
+.asReversed() -> list is backed by original list and a view of it is returned. This means
+that in case the original list was modified, then the variable that is referencing the reversed list view,
+if used again, will reflect the new changes without needing to invoke .asReversed() again
 
 println(stringsList.getOrNull(5))
-println(stringsList.getOrElse(5) { it -> it * 10 })
+println(stringsList.getOrElse(5) { it -> it * 10 }) -> in this case, it is not the resulting value (which does not exist anyway)
+but the value provided for the index
 
-val intsList2 = listOf(1, 5, 6, 2)
-intsList2.max() => get biggest value (in this case, it is 6)
+val intList2 = listOf(1, 5, 6, 2)
+intList2.max() => get biggest value (in this case, it is 6)
 
 colorList.zip(stringsList) => creates a list of pairs
 [(black, spring), (while, summer), (green, fall)] => if the lists are not equal in size, additional elements get dropped of
@@ -1140,13 +1144,13 @@ pairs are a kotlin element Pair<A, B>
 
 val combinedLists = colorList + stringsList => this wil concatenate the lists together
 
-val noDupsList = colorList.union(stringsList) => filteres out duplicates from the resulting list
+val noDupsList = colorList.union(stringsList) => filters out duplicates from the resulting list
 
 val noDupColors = colorList.distinct() => we can remove the dups from a list
 
 Some functions apply on the list and some return a new list
 
-val mutableSeasons = stringsList.toMutableList() => we can create a mutable list from an immutbable list
+val mutableSeasons = stringsList.toMutableList() => we can create a mutable list from an immutable list
 mutableSeasons.add("some other season")
 println(mutableSeasons)
 
@@ -1177,7 +1181,7 @@ val pair = Pair(10, "ten")
 val value1 = pair.first
 val value2 = pair.second
 
-// we destructrured or distributed an instance
+// we destructured or distributed an instance
 val (valueA, valueB) = pair
 
 Another Example:
@@ -1193,7 +1197,7 @@ for ((key, value) in mutableMap) {
 
 custom destructuring
 --------------------
-Thie requires the implementation of component functions, i.e you do not get it out of the box
+This requires the implementation of component functions, i.e you do not get it out of the box
 keyword: operator in front of "fun"
 
 val car = Car("red", "bmw", 1994)
@@ -1207,10 +1211,13 @@ class Car(val color: String, val model: String, val year: Int) {
     operator fun component3() = year
 }
 
-the properties need to be public ofcourse
+the properties need to be public of course
 
 Exception: data classes
-in addition to equals and toString functions, they get component function for free
+in addition to equals and toString f unctions, they get component function for free
+
+Only properties declared in the primary constructor of a data class get componentN() functions.
+Properties defined outside the primary constructor or in the body of the class do not get component functions.
 
 Sets
 ----
@@ -1277,12 +1284,12 @@ what if these collections were huge? (memory/performance concerns)
 
 Sequences are similar to Java Streams
 When dealing with collections, the collection is dealt with a whole, then passed on as a whole
-with Sequences, each items is enumrated and can be acted-on/evaluated on its own, then passed on to the next step or chained function
+with Sequences, each items is enumerated and can be acted-on/evaluated on its own, then passed on to the next step or chained function
 (whe applicable of course)
 => that way there is no need to create intermediate collections
 
 Streams or Sequences should only be used with large Collections
-Sequence in kotline are quite efficient
+Sequence in kotlin are quite efficient
 immutableMap2.asSequence().filter { it.value.model == "ford" }.map { it.value.color }
 simply add a .asSequence() call
 
@@ -1291,24 +1298,27 @@ each intermediate step returns a sequence which is passed to the next step
 when done, we want to do a terminal operations and terminate the chain and get something concrete
 
 Sequences are lazily evaluated, meaning that they are not evaluated until a terminal operation takes place
-listOf("joe", "john", "jane")
+ val myList = listOf("jofe", "john", "jane")
         .asSequence()
-        .filter { println(it); it[0] == 'j' }
+        .filter { println(it); it[3] == 'e' }
         .map { println(it); it.uppercase() }
+        .toList()
+
+    println(myList)
 => in the example above, nothing gets printed because filter and map are intermediate operations, they return sequences
 if we add at the end: .toList() => this returns a list and not a sequence, thus it is considered a terminal operation
 
 The print output will be:
-joe
-joe
-john
+jofe
+jofe
 john
 jane
 jane
+[JOFE, JANE]
 => notice that each entry in goes through the full pipeline (.filter() it gets printed, then .map() and it gets printed again)
-if within the chain, an intermediate operation returns fals or skips some entry (like .filter()), the item does not continue down the chain (or pipeline)
+if within the chain, an intermediate operation returns false or skips some entry (like .filter()), the item does not continue down the chain (or pipeline)
 
-using the find() function (terminal op), it will return the moment it matches the 1st time, so the rest of the data withint the stream does not get processed
+using the find() function (terminal op), it will return the moment it matches the 1st time, so the rest of the data within the stream does not get processed
 
 When working with collection instead of sequences, the order of the functions matter
 since the resulting collection will be passed
@@ -1389,7 +1399,7 @@ val strings = listOf("1", "2", "bla")
 if (strings is List<String>) {
     println("strings is a List<String>")
 }
-the above works, probably because the compiler at compile time knows that this check alwasy resolves to true
+the above works, probably because the compiler at compile time knows that this check always resolves to true
 to the byte code of the "if" statement does not get generated
 
 val strings = listOf("1", "2", "bla")
@@ -1494,8 +1504,8 @@ fun mutableConvertToInt(collection: MutableList<Number>) {
     }
 }
 
-we are able to do this with immutable lists. when we want to pass a List<Short> to a List<Number>, with the later being a superty of the former
-and we want this subtyping to be preserved when deealing with generics, we have to declare the type as covariant
+we are able to do this with immutable lists. when we want to pass a List<Short> to a List<Number>, with the later being a supertype of the former
+and we want this subtyping to be preserved when dealing with generics, we have to declare the type as covariant
 
 thus, an immutable collection is covariant and mutable list is not
 
@@ -1518,7 +1528,7 @@ class Rose : Flower() {}
 
 class Daisy : Flower() {}
 
-// a covariante comes with restrictions (like immutable classes)
+// a covariant comes with restrictions (like immutable classes)
 // we can only use a covariant class in the "out" position
 // function parameters are "in" position
 // function return type are "out" position
@@ -1546,7 +1556,7 @@ fun mutableConvertToInt(collection: MutableList<Number>) {
         println(num.toInt())
     }
     collection.add(25) => here, this will no get underlined in red, it will not show an error
-    but if you notice, we would literally be adding a integer to a list of Shorts since the subtypiong is preserved
+    but if you notice, we would literally be adding a integer to a list of Shorts since the subtyping is preserved
     that is why List does not have an add() function, because then, it opens it up for these kind of shenanigans
 }
 
@@ -1554,21 +1564,21 @@ If you check the mutable list vs list class, you will notice that the later has 
 
 you can use the type in the "in" position as such:
 fun myFun(element: @UnsafeVariance T): SomeReturnType {...} only if myFun changes nothing about the instance's data,
-but you have to be ABSOLUTLY SURE (like the !! operator)
+but you have to be ABSOLUTELY SURE (like the !! operator)
 
 NOTE: 
-constructor paramters do not have in and out positions, they are called with an instance is created
+constructor parameters do not have in and out positions, they are called with an instance is created
 Also, with "out", we have to use val and not var
 with var, kotlin will generate a setter, which means a "in" position
 private functions and properties do not have in and out positions also; not available to the outside world
 so "private var" would work
 
-do not confuse passing a rose graden to a method that takes a rose garden (subtype) vs one that takes a flower garden
+do not confuse passing a rose garden to a method that takes a rose garden (subtype) vs one that takes a flower garden
 functions declared as part of the class usually do not face this issue because of type erasure
 
 +++++++++++
 covariance: we want subtype to be preserved => we are looking down the Inheritance tree
-contravariance: we want supertype to be preserved => we are looking down the Inheritance tree
+contravariance: we want supertype to be preserved => we are looking up the Inheritance tree
 
 Flower -> Rose
 Flower -> Tulip
@@ -1648,7 +1658,7 @@ interface FlowerCare<in T> {
 
 All the examples above for variance are known as "Declaration Site Variance" because we are doing it when we declare a class or an interface
 In Java we do not have "Declaration Site Variance", we only have "Use Site Variance"
-When we say Declaration site, we are usually refering to a class or interface
+When we say Declaration site, we are usually referring to a class or interface
 
 NOTE: in general, generics types are invariant
 
@@ -1689,7 +1699,7 @@ class Ford : Car2() {}
 
 File / IO
 =========
-Kotline does not have its own IO classes
+Kotlin does not have its own IO classes
 it uses the ones that comes with Java
 
 REFER TO FOLLOWING LINK FOR THE FULL DOCS
@@ -1701,9 +1711,9 @@ By default, the char set is UTF-8, but we can pass a new one as a parameter to t
 Make is a habit of checking the function definition: "right click -> declaration (IDE)"
 readLines() for example => it tells you not to use for large files
 
-Most function close the reader, but some will tell you (in their docs in the IDE) that it is your responsability to close the reader
+Most function close the reader, but some will tell you (in their docs in the IDE) that it is your responsibility to close the reader
 
-NOTE: for binary files, the length - generaly 2 bytes long - (the weird characters that show up) of a binary string is written in front of it so we can know what it is when parsing 
+NOTE: for binary files, the length - generally 2 bytes long - (the weird characters that show up) of a binary string is written in front of it so we can know what it is when parsing
 
 File("testfile.txt").reader()
 // Equivalent to:
@@ -1744,7 +1754,7 @@ try {
 }
 
 // walking the file tree
-// the walk functions are return a sequence of files
+// the walk functions return a sequence of files
 File(".").walkTopDown().forEach { println(it) }
 File(".").walkBottomUp().forEach { println(it) }
 
@@ -1760,8 +1770,8 @@ When creating an instance from a java class, you simply import it and then write
 
 Nullability
 -----------
-@Nullable and @NotNull => documentation only: they are not inforced (written in the Java file)
-kotlin detects these and maps the objects or properties to kotlin nullable or not nullable versions of them (how to compiler it is going to treat it)
+@Nullable and @NotNull => documentation only: they are not enforced (written in the Java file)
+kotlin detects these and maps the objects or properties to kotlin nullable or not nullable versions of them (how the compiler it is going to treat it)
 we can set a property to null, we do not get a compiler error, but when we run we get the error (runtime error)
 
 public void setColor(@NotNull String color) {
@@ -1772,13 +1782,13 @@ public void setColor(@Nullable String color) {
     this.color = color;
 }
 
-default type for a java type (property comming from java) is the nullable type
+default type for a java type (property coming from java) is the nullable type
 var model = JavaCar.model => model knows it is being assigned a value from java, hence it is implicitly declared as a nullable type
 if we explicitly declare model as a nullable kotlin type (var mode: String?), we can no longer do: println(model.javaClass), since model can now be null (now directly known to the kotlin compiler)
-NOTE: you can also explicitly declare the kotlin proprty as non-nullable if you are getting its value from java code
+NOTE: you can also explicitly declare the kotlin property as non-nullable if you are getting its value from java code
 
 in case we do not specify the Nullability in java, then the variables that are created are called platform type
-this occurs when mixing koltin with another language
+this occurs when mixing kotlin with another language
 
 in kotlin we can not declare platform types, it is either known and nullable or known and not-nullable (known meaning: String, Int... etc)
 
@@ -1830,7 +1840,7 @@ in kotlin, they become companion objects
 SAM conversions
 ---------------
 Single Abstract Method
-when a java interface has a single abtract method, we can use a lambda expression rather than an anonymous instance (as of Java 8 that is)
+when a java interface has a single abstract method, we can use a lambda expression rather than an anonymous instance (as of Java 8 that is)
 Runnable interface in a SAM interface (has 1 method: run())
 
 Java Example:
@@ -1869,47 +1879,47 @@ import learn.kotlin.CarKt
 CarKt.topLevel();
 
 what if we called the kotlin class: "CarKt" instead of "Car"?
-this will casuse a conflict, but we can change the the name of the generate file using:
+this will cause a conflict, but we can change the the name of the generate file using:
 @file:JvmName("StaticCar") => you put this at the very top of the file, before everything
 the import name then changes:
 import learn.kotlin.StaticCar
 
-For extention functions,
-we can not simply to a .MyFun on the object, we will have to use it using the file/class name:
+For extension functions,
+we can not simply do a .MyFun on the object, we will have to use it using the file/class name:
 if we had:
 fun String.print() = println(this) => this prints the string object itself
 we have to do:
 StaticCar.print("blabl blabla")
 
-when intantiating a kotlin object from java, it has to be done the class way:
+when instantiating a kotlin object from java, it has to be done the class way:
 Car car = new Car("bla", "bli")
-the getter and setters will be automatically created if the class was defined in kotlin unless:
+the getters and setters will be automatically created if the class was defined in kotlin unless:
 - we used val instead of var => we only get a getter
 - private var
 
 class Car (color:String, val model: String){
     private color: String = color
         set(value) {
-            filed = "always green"
+            field = "always green"
         }
 }
 
 so in java, we will automatically get: car.getModel() => the IDE only gives us this option
 
 when dealing with boolean:
-the getter will be called: isMyBool() instead og getMyBool()
+the getter will be called: isMyBool() instead of getMyBool()
 
 PS: for variables with multiple words, camel casing is preserved
 
 if we want java to access a property without going through the getter and setter:
-we use the annotatil: @JvmField
+we use the annotation: @JvmField
 class Car (color:String, @JvmField val model: String){...}
 here, we can now do "car.model" from java
 
 @JvmField has restrictions, can not be used with:
 - private properties
-- property that overrides another property or one that can be overriden
-- constant property (when the keyword const is explicitly used in koltin)
+- property that overrides another property or one that can be overridden
+- constant property (when the keyword const is explicitly used in kotlin)
 
 how to access functions withing companion objects?
 we must use the @JvmStatic annotation: we put this in the kotlin file
@@ -1928,7 +1938,7 @@ Car.Companion.carComp();
 So... we do: @JvmStatic fun carComp () {...}
 then we can do: Car.carComp() => static call
 
-the above is cleare when dealing with singletons:
+the above is clearer when dealing with singletons:
 Kotlin:
 object SingletonObject {
     fun myFun() = println("bla")
@@ -1941,9 +1951,9 @@ but this does no look java like, so we do:
 then we can do:
 SingletonObject.myFun();
 
-For static proprties in the companion object, we also use @JvmField to make them accessible from Java
+For static properties in the companion object, we also use @JvmField to make them accessible from Java
 
-const properties in the companion object are immediatly turned to static and does not need to be annotated
+const properties in the companion object are immediately turned to static and does not need to be annotated
 the same applies for late initialized properties
 
 in the case below, the kotlin fun is expecting a non-null value, but we can still pass it, we get a runtime IllegalArgumentException
@@ -1955,7 +1965,7 @@ fun printMe(text: String){
 car.printMe(null);
 
 in kotlin, we do not need to declare that a function throws an exception while in Java we do
-so if a fun in kotlin throws one, we can call the funcation in Java and it will not ask us to put a try/catch
+so if a fun in kotlin throws one, we can call the function in Java and it will not ask us to put a try/catch
 because their is nothing in the compiled code that tells us an exception can be thrown
 so, we annotate the method with @Throws(Exception:class) // you can be more specific about the exception class
 @Throws(IOException::class)
@@ -1963,11 +1973,10 @@ fun doIO() {
     throw IOException()
 }
 
-with kotlin, we can functions accept default parameter values
+with kotlin, we can have functions accept default parameter values
 when the kotlin compiler compiles the code, it generates 1 version for Java, which is the one without default parameter values
 so we annotate: @JvmOverloads
 and now we get both versions of the function
 @JvmOverloads fun defaultArgs(str: String, num: Int = 25){}
 
-PS: when calling kotlin from java, if using non-nullable types, then koltin will throw an IllegalArgumentException if null is passed without
-having to add @Throws(IllegalArgumentException::class) for example
+PS: when calling kotlin from java, if using non-nullable types, then kotlin will throw an IllegalArgumentException if null is passed without having to add @Throws(IllegalArgumentException::class) for example
